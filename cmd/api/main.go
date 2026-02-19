@@ -49,10 +49,10 @@ func NewAPIServer(address string, db *sql.DB, logger *slog.Logger) *APIServer {
 // Run() handles starting up the http server
 func (server *APIServer) Run() error {
 	router := mux.NewRouter()
-	router.Use(middleware.StripTrailingSlashMiddleware)
-	subrouter := router.PathPrefix("/api/v1").Subrouter()
+	wrappedRouter := middleware.StripTrailingSlashMiddleware(router) // router wrapping is needed here to ensure that middleware runs BEFORE matching to the path
+	subrouter := router.PathPrefix("/api/v1/").Subrouter()
 
 	linkConn := link.NewLinkConn(server.db, server.logger)
 	linkConn.RegisterRoutes(subrouter)
-	return http.ListenAndServe(server.address, router)
+	return http.ListenAndServe(server.address, wrappedRouter)
 }

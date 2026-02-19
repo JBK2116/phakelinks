@@ -2,10 +2,11 @@ package link
 
 import (
 	"database/sql"
-	"fmt"
+	"encoding/json"
 	"log/slog"
 	"net/http"
 
+	"github.com/JBK2116/phakelinks/types"
 	"github.com/gorilla/mux"
 )
 
@@ -29,8 +30,11 @@ func (linkConn *LinkConn) RegisterRoutes(router *mux.Router) {
 }
 
 // handleCreateLink() handles the business logic for creating a new link
-func (linkConn *LinkConn) handleCreateLink(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Header", r.Header)
-	fmt.Println("Method", r.Method)
-	fmt.Println("Body: ", r.Body)
+func (linkConn *LinkConn) handleCreateLink(writer http.ResponseWriter, request *http.Request) {
+	var CreateLinkDTO types.CreateLinkDTO
+
+	if err := json.NewDecoder(request.Body).Decode(&CreateLinkDTO); err != nil {
+		linkConn.logger.Debug("Invalid Create Link Payload")
+	}
+	defer request.Body.Close()
 }
