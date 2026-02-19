@@ -1,0 +1,9 @@
+linters:
+    default: none
+    enable:
+        - sloglint
+    settings:
+        sloglint:
+            # Enforce using attributes only.
+            # This will raise an error for any key-value pair arguments.
+            attr-only: true
