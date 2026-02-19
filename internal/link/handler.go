@@ -31,10 +31,21 @@ func (linkConn *LinkConn) RegisterRoutes(router *mux.Router) {
 
 // handleCreateLink() handles the business logic for creating a new link
 func (linkConn *LinkConn) handleCreateLink(writer http.ResponseWriter, request *http.Request) {
-	var CreateLinkDTO types.CreateLinkDTO
+	var dto types.CreateLinkDTO
 
-	if err := json.NewDecoder(request.Body).Decode(&CreateLinkDTO); err != nil {
-		linkConn.logger.Debug("Invalid Create Link Payload")
+	if err := json.NewDecoder(request.Body).Decode(&dto); err != nil {
+		writer.Header().Set("Content-Type", "application/json")
+		writer.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(writer).Encode(map[string]string{"error": err.Error()})
+		linkConn.logger.Error("Error decoding CreateLinkDTO payload", slog.Any("error", err))
 	}
 	defer request.Body.Close()
+
+	if err := ValidateCreateLinkDTO(dto); err != nil {
+		writer.Header().Set("Content-Type", "application/json")
+		writer.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(writer).Encode(map[string]string{"error": err.Error()})
+		linkConn.logger.Info("Invalid CreateLinkDTO payload", slog.Any("error", err.Error()))
+	}
+
 }
