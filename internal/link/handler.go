@@ -3,6 +3,7 @@ package link
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"log/slog"
 	"net/http"
 
@@ -38,6 +39,7 @@ func (linkConn *LinkConn) handleCreateLink(writer http.ResponseWriter, request *
 		writer.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(writer).Encode(map[string]string{"error": err.Error()})
 		linkConn.logger.Error("Error decoding CreateLinkDTO payload", slog.Any("error", err))
+		return
 	}
 	defer request.Body.Close()
 
@@ -46,6 +48,19 @@ func (linkConn *LinkConn) handleCreateLink(writer http.ResponseWriter, request *
 		writer.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(writer).Encode(map[string]string{"error": err.Error()})
 		linkConn.logger.Info("Invalid CreateLinkDTO payload", slog.Any("error", err.Error()))
+		return
 	}
 
+	if dto.Mode == string(types.Educational) {
+		randPhishingTechnique := GetRandomPhishingTechnique()
+		explanationDTO, err := GetEducationalAISummary(randPhishingTechnique, dto.URL)
+		if err != nil {
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(writer).Encode(map[string]string{"error": err.Error()})
+			linkConn.logger.Info("Error creating explanationDTO", slog.Any("error", err.Error()))
+		}
+		fmt.Println("fake_url: ", explanationDTO.FakeURL)
+		fmt.Println("explanation", explanationDTO.Explanation)
+	}
 }

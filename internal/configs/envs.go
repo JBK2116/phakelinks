@@ -17,6 +17,7 @@ type Config struct {
 	DBUser     string
 	DBPassword string
 	DBName     string
+	OPENAI_KEY string
 }
 
 // Envs represents the access point for using all configuration variables
@@ -35,6 +36,7 @@ func initConfig() Config {
 		DBUser:     getEnv("DBUser", "postgres"),
 		DBPassword: getEnv("DBPassword", "random"),
 		DBName:     getEnv("DBName", "phakelinks"),
+		OPENAI_KEY: getEnv("OPENAI_KEY", "OPENAI_KEY"),
 	}
 }
 
