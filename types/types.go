@@ -38,8 +38,9 @@ var AllPhishingTechniques = []PhishingTechnique{
 
 // CreateLink represents the incoming request payload to generate a phishing URL.
 type CreateLinkDTO struct {
-	URL  string `json:"url"`
-	Mode string `json:"mode"`
+	URL     string   `json:"url"`
+	Mode    string   `json:"mode"`
+	Exclude []string `json:"exclude"`
 }
 
 // ReturnLink represents the response payload containing the original and generated phishing URL.

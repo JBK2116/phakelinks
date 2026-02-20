@@ -25,11 +25,17 @@ func ValidateCreateLinkDTO(dto types.CreateLinkDTO) error {
 	if dto.Mode == "" {
 		return fmt.Errorf("mode is required")
 	}
+	if dto.Exclude == nil {
+		return fmt.Errorf("exclude is required")
+	}
 	if !ValidateOriginalURL(dto.URL) {
 		return fmt.Errorf("Invalid URL or domain: %s", dto.URL)
 	}
 	if !ValidateMode(dto.Mode) {
 		return fmt.Errorf("Invalid mode: %s", dto.Mode)
+	}
+	if err := ValidateExcludes(dto.Exclude); err != nil {
+		return err
 	}
 	return nil
 }
@@ -61,6 +67,33 @@ func ValidateDomain(rawDomain string) bool {
 // ValidateMode() checks that the provided mode is a valid mode defined in `types.go`
 func ValidateMode(mode string) bool {
 	return mode == string(types.Educational) || mode == string(types.Prank)
+}
+
+func ValidateExcludes(excludes []string) error {
+	if len(excludes) > len(types.AllPhishingTechniques) {
+		return fmt.Errorf("Too many values in excludes: Max = %d", len(types.AllPhishingTechniques))
+	}
+	seen := make(map[string]struct{})
+	for _, v := range excludes {
+		if _, exists := seen[v]; exists {
+			continue
+		}
+		if !contains(v) {
+			return fmt.Errorf("Invalid excludes type - %s", v)
+		}
+		seen[v] = struct{}{}
+	}
+	return nil
+}
+
+// contains() checks if the provided string matches at least one phishing technique in `types.AllPhishingTechniques` slice
+func contains(s string) bool {
+	for _, v := range types.AllPhishingTechniques {
+		if string(v) == s {
+			return true
+		}
+	}
+	return false
 }
 
 // GetRandomPhishingTechnique() returns a random PhishingTechnique enum
