@@ -63,5 +63,5 @@ type ErrorResponse struct {
 	Error   string `json:"error"`
 	Message string `json:"message"`
 	Value   string `json:"value,omitempty"`
-	Extra   string `json:"extra, omitempty"`
+	Extra   string `json:"extra,omitempty"`
 }
