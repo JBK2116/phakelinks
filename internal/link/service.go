@@ -4,9 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"math/rand/v2"
-	"net/url"
-	"regexp"
+	"net/http"
 	"strings"
 	"time"
 
@@ -34,11 +34,11 @@ func ValidateCreateLinkDTO(dto types.CreateLinkDTO) *types.ErrorResponse {
 			Message: "exclude is required",
 		}
 	}
-	if !ValidateOriginalURL(dto.URL) {
+	if err := ValidateOriginalURL(dto.URL); err != nil {
 		return &types.ErrorResponse{
 			Error:   "INVALID_URL",
 			Message: "the provided url or domain is invalid",
-			Value:   dto.URL,
+			Value:   err.Error(),
 		}
 	}
 	if !ValidateMode(dto.Mode) {
@@ -59,27 +59,77 @@ func ValidateCreateLinkDTO(dto types.CreateLinkDTO) *types.ErrorResponse {
 }
 
 // ValidateOriginalURL() ensures that the provided CreateLinkDTO holds valid url information
-func ValidateOriginalURL(originalURL string) bool {
+func ValidateOriginalURL(originalURL string) error {
+	httpClient := &http.Client{}
 	if strings.HasPrefix(originalURL, "http://") || strings.HasPrefix(originalURL, "https://") {
-		return ValidateURL(originalURL)
+		return ValidateURL(originalURL, *httpClient)
 	} else {
-		return ValidateDomain(originalURL)
+		return ValidateDomain(originalURL, *httpClient)
 	}
 }
 
 // ValidateURL() checks that the provided URL string is a valid, well-formed HTTP/HTTPS URL.
-func ValidateURL(rawURL string) bool {
-	if _, err := url.ParseRequestURI(rawURL); err != nil {
-		return false
+func ValidateURL(rawURL string, client http.Client) error {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute*1)
+	defer cancel()
+	url := "https://api.cloudmersive.com/validate/domain/url/full"
+	method := "POST"
+	payload := strings.NewReader(rawURL)
+	req, err := http.NewRequestWithContext(ctx, method, url, payload)
+	if err != nil {
+		return err
 	}
-	return true
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("ApiKey", configs.Envs.CLOUDMERSIVE_KEY)
+	res, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer res.Body.Close()
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return err
+	}
+	result := make(map[string]bool)
+	if err := json.Unmarshal(body, &result); err != nil {
+		return err
+	}
+	if !result["ValidDomain"] {
+		return fmt.Errorf("%s", rawURL)
+	}
+	return nil
 }
 
 // ValidateDomain() checks the the provided domain string is a valid, well-formed web domain
-func ValidateDomain(rawDomain string) bool {
-	regex := `^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$`
-	ok, _ := regexp.MatchString(regex, rawDomain)
-	return ok
+func ValidateDomain(rawDomain string, client http.Client) error {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute*1)
+	defer cancel()
+	url := "https://api.cloudmersive.com/validate/domain/check"
+	method := "POST"
+	payload := strings.NewReader(rawDomain)
+	req, err := http.NewRequestWithContext(ctx, method, url, payload)
+	if err != nil {
+		return err
+	}
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("ApiKey", configs.Envs.CLOUDMERSIVE_KEY)
+	res, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer res.Body.Close()
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return err
+	}
+	result := make(map[string]bool)
+	if err := json.Unmarshal(body, &result); err != nil {
+		return err
+	}
+	if !result["ValidDomain"] {
+		return fmt.Errorf("%s", rawDomain)
+	}
+	return nil
 }
 
 // ValidateMode() checks that the provided mode is a valid mode defined in `types.go`

@@ -9,15 +9,16 @@ import (
 
 // Config represents all configuration variables needed to run this application
 type Config struct {
-	IsDev      bool
-	PublicHost string
-	PublicPort string
-	DBHost     string
-	DBPort     int64
-	DBUser     string
-	DBPassword string
-	DBName     string
-	OPENAI_KEY string
+	IsDev            bool
+	PublicHost       string
+	PublicPort       string
+	DBHost           string
+	DBPort           int64
+	DBUser           string
+	DBPassword       string
+	DBName           string
+	OPENAI_KEY       string
+	CLOUDMERSIVE_KEY string
 }
 
 // Envs represents the access point for using all configuration variables
@@ -28,15 +29,16 @@ func initConfig() Config {
 	godotenv.Load()
 
 	return Config{
-		IsDev:      getEnvBool("IsDev", true),
-		PublicHost: getEnv("PublicHost", "http://localhost"),
-		PublicPort: getEnv("PublicPort", "8080"),
-		DBHost:     getEnv("DBHost", "localhost"),
-		DBPort:     getEnvAsInt("DBPort", 5432),
-		DBUser:     getEnv("DBUser", "postgres"),
-		DBPassword: getEnv("DBPassword", "random"),
-		DBName:     getEnv("DBName", "phakelinks"),
-		OPENAI_KEY: getEnv("OPENAI_KEY", "OPENAI_KEY"),
+		IsDev:            getEnvBool("IsDev", true),
+		PublicHost:       getEnv("PublicHost", "http://localhost"),
+		PublicPort:       getEnv("PublicPort", "8080"),
+		DBHost:           getEnv("DBHost", "localhost"),
+		DBPort:           getEnvAsInt("DBPort", 5432),
+		DBUser:           getEnv("DBUser", "postgres"),
+		DBPassword:       getEnv("DBPassword", "random"),
+		DBName:           getEnv("DBName", "phakelinks"),
+		OPENAI_KEY:       getEnv("OPENAI_KEY", "OPENAI_KEY"),
+		CLOUDMERSIVE_KEY: getEnv("CLOUDMERSIVE_KEY", "CLOUDMERSIVE_KEY"),
 	}
 }
 
