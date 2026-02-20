@@ -18,24 +18,42 @@ import (
 )
 
 // ValidateCreateLinkDTO() ensures that the provided CreateLinkDTO holds valid information in all fields
-func ValidateCreateLinkDTO(dto types.CreateLinkDTO) error {
+func ValidateCreateLinkDTO(dto types.CreateLinkDTO) *types.ErrorResponse {
 	if dto.URL == "" {
-		return fmt.Errorf("url is required")
+		return &types.ErrorResponse{Error: "MISSING_URL", Message: "url is required"}
 	}
 	if dto.Mode == "" {
-		return fmt.Errorf("mode is required")
+		return &types.ErrorResponse{
+			Error:   "MISSING_MODE",
+			Message: "mode is required",
+		}
 	}
 	if dto.Exclude == nil {
-		return fmt.Errorf("exclude is required")
+		return &types.ErrorResponse{
+			Error:   "MISSING_EXCLUDE",
+			Message: "exclude is required",
+		}
 	}
 	if !ValidateOriginalURL(dto.URL) {
-		return fmt.Errorf("Invalid URL or domain: %s", dto.URL)
+		return &types.ErrorResponse{
+			Error:   "INVALID_URL",
+			Message: "the provided url or domain is invalid",
+			Value:   dto.URL,
+		}
 	}
 	if !ValidateMode(dto.Mode) {
-		return fmt.Errorf("Invalid mode: %s", dto.Mode)
+		return &types.ErrorResponse{
+			Error:   "INVALID_MODE",
+			Message: "the provided mode is invalid",
+			Value:   dto.Mode,
+		}
 	}
 	if err := ValidateExcludes(dto.Exclude); err != nil {
-		return err
+		return &types.ErrorResponse{
+			Error:   "INVALID_EXCLUDE",
+			Message: "the provided exclude value is invalid",
+			Extra:   err.Error(),
+		}
 	}
 	return nil
 }
@@ -69,17 +87,17 @@ func ValidateMode(mode string) bool {
 	return mode == string(types.Educational) || mode == string(types.Prank)
 }
 
-func ValidateExcludes(excludes []string) error {
-	if len(excludes) > len(types.AllPhishingTechniques) {
-		return fmt.Errorf("Too many values in excludes: Max = %d", len(types.AllPhishingTechniques))
+func ValidateExcludes(exclude []string) error {
+	if len(exclude) > len(types.AllPhishingTechniques) {
+		return fmt.Errorf("Length of exclude array cannot exceed %d", len(types.AllPhishingTechniques))
 	}
 	seen := make(map[string]struct{})
-	for _, v := range excludes {
+	for _, v := range exclude {
 		if _, exists := seen[v]; exists {
 			continue
 		}
 		if !contains(v) {
-			return fmt.Errorf("Invalid excludes type - %s", v)
+			return fmt.Errorf("%s is an invalid exclude type", v)
 		}
 		seen[v] = struct{}{}
 	}
@@ -103,6 +121,7 @@ func GetRandomPhishingTechnique() types.PhishingTechnique {
 	return types.AllPhishingTechniques[randIndex]
 }
 
+// GetEducationalAISummary() queries the OPENAI API for the AI summary, returning the `ExplanationDTO` if successful
 func GetEducationalAISummary(phishingTech types.PhishingTechnique, url string) (types.ExplanationDTO, error) {
 	duration := time.Minute * 1
 	ctx, cancelContext := context.WithTimeout(context.Background(), duration)

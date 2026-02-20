@@ -43,11 +43,11 @@ func (linkConn *LinkConn) handleCreateLink(writer http.ResponseWriter, request *
 	}
 	defer request.Body.Close()
 
-	if err := ValidateCreateLinkDTO(dto); err != nil {
+	if errStruct := ValidateCreateLinkDTO(dto); errStruct != nil {
 		writer.Header().Set("Content-Type", "application/json")
 		writer.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(writer).Encode(map[string]string{"error": err.Error()})
-		linkConn.logger.Info("Invalid CreateLinkDTO payload", slog.Any("error", err.Error()))
+		json.NewEncoder(writer).Encode(errStruct)
+		linkConn.logger.Info("Invalid CreateLinkDTO payload", slog.Any("error", errStruct))
 		return
 	}
 

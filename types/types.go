@@ -57,3 +57,11 @@ type ExplanationDTO struct {
 	FakeURL     string `json:"fake_url"`
 	Explanation string `json:"explanation"`
 }
+
+// ErrorResponse represents an error that occurs during runtime
+type ErrorResponse struct {
+	Error   string `json:"error"`
+	Message string `json:"message"`
+	Value   string `json:"value,omitempty"`
+	Extra   string `json:"extra, omitempty"`
+}
