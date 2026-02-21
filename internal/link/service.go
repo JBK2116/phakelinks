@@ -19,7 +19,7 @@ import (
 
 // ValidateCreateLinkDTO() ensures that the provided CreateLinkDTO holds valid information in all fields
 func ValidateCreateLinkDTO(dto types.CreateLinkDTO) *types.ErrorResponse {
-	if dto.URL == "" {
+	if dto.Link == "" {
 		return &types.ErrorResponse{Error: "MISSING_URL", Message: "url is required"}
 	}
 	if dto.Mode == "" {
@@ -34,7 +34,7 @@ func ValidateCreateLinkDTO(dto types.CreateLinkDTO) *types.ErrorResponse {
 			Message: "exclude is required",
 		}
 	}
-	if err := ValidateOriginalURL(dto.URL); err != nil {
+	if err := ValidateLink(dto.Link); err != nil {
 		return &types.ErrorResponse{
 			Error:   "INVALID_URL",
 			Message: "the provided url or domain is invalid",
@@ -58,13 +58,13 @@ func ValidateCreateLinkDTO(dto types.CreateLinkDTO) *types.ErrorResponse {
 	return nil
 }
 
-// ValidateOriginalURL() ensures that the provided CreateLinkDTO holds valid url information
-func ValidateOriginalURL(originalURL string) error {
+// ValidateLink() ensures that the provided CreateLinkDTO holds valid url information
+func ValidateLink(link string) error {
 	httpClient := &http.Client{}
-	if strings.HasPrefix(originalURL, "http://") || strings.HasPrefix(originalURL, "https://") {
-		return ValidateURL(originalURL, *httpClient)
+	if strings.HasPrefix(link, "http://") || strings.HasPrefix(link, "https://") {
+		return ValidateURL(link, *httpClient)
 	} else {
-		return ValidateDomain(originalURL, *httpClient)
+		return ValidateDomain(link, *httpClient)
 	}
 }
 
@@ -179,8 +179,8 @@ func GetRandomPhishingTechnique(excludes []string) string {
 // GetEducationalAISummary() queries the OPENAI API for the AI summary, returning the `ExplanationDTO` if successful
 func GetEducationalAISummary(phishingTech string, url string) (types.ExplanationDTO, error) {
 	duration := time.Minute * 1
-	ctx, cancelContext := context.WithTimeout(context.Background(), duration)
-	defer cancelContext()
+	ctx, cancelCtx := context.WithTimeout(context.Background(), duration)
+	defer cancelCtx()
 
 	client := openai.NewClient(
 		option.WithAPIKey(configs.Envs.OPENAI_KEY),

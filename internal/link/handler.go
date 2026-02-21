@@ -53,14 +53,14 @@ func (linkConn *LinkConn) handleCreateLink(writer http.ResponseWriter, request *
 
 	if dto.Mode == string(types.Educational) {
 		randPhishingTechnique := GetRandomPhishingTechnique(dto.Exclude)
-		explanationDTO, err := GetEducationalAISummary(randPhishingTechnique, dto.URL)
+		explanationDTO, err := GetEducationalAISummary(randPhishingTechnique, dto.Link)
 		if err != nil {
 			writer.Header().Set("Content-Type", "application/json")
 			writer.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(writer).Encode(map[string]string{"error": err.Error()})
 			linkConn.logger.Info("Error creating explanationDTO", slog.Any("error", err.Error()))
 		}
-		fmt.Println("fake_url: ", explanationDTO.FakeURL)
+		fmt.Println("fake_url: ", explanationDTO.FakeLink)
 		fmt.Println("explanation", explanationDTO.Explanation)
 	}
 }
