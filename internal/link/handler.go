@@ -52,7 +52,7 @@ func (linkConn *LinkConn) handleCreateLink(writer http.ResponseWriter, request *
 	}
 
 	if dto.Mode == string(types.Educational) {
-		randPhishingTechnique := GetRandomPhishingTechnique()
+		randPhishingTechnique := GetRandomPhishingTechnique(dto.Exclude)
 		explanationDTO, err := GetEducationalAISummary(randPhishingTechnique, dto.URL)
 		if err != nil {
 			writer.Header().Set("Content-Type", "application/json")

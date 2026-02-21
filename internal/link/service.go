@@ -138,15 +138,15 @@ func ValidateMode(mode string) bool {
 }
 
 func ValidateExcludes(exclude []string) error {
-	if len(exclude) > len(types.AllPhishingTechniques) {
-		return fmt.Errorf("Length of exclude array cannot exceed %d", len(types.AllPhishingTechniques))
+	if len(exclude) >= len(types.AllPhishingTechniques) {
+		return fmt.Errorf("Length of exclude array must be less than %d", len(types.AllPhishingTechniques))
 	}
 	seen := make(map[string]struct{})
 	for _, v := range exclude {
 		if _, exists := seen[v]; exists {
 			continue
 		}
-		if !contains(v) {
+		if !contains(types.AllPhishingTechniques, v) {
 			return fmt.Errorf("%s is an invalid exclude type", v)
 		}
 		seen[v] = struct{}{}
@@ -154,9 +154,9 @@ func ValidateExcludes(exclude []string) error {
 	return nil
 }
 
-// contains() checks if the provided string matches at least one phishing technique in `types.AllPhishingTechniques` slice
-func contains(s string) bool {
-	for _, v := range types.AllPhishingTechniques {
+// contains() checks if the provided string is in the provided array slice
+func contains[T ~string](slice []T, s string) bool {
+	for _, v := range slice {
 		if string(v) == s {
 			return true
 		}
@@ -165,14 +165,19 @@ func contains(s string) bool {
 }
 
 // GetRandomPhishingTechnique() returns a random PhishingTechnique enum
-func GetRandomPhishingTechnique() types.PhishingTechnique {
-	amountOptions := len(types.AllPhishingTechniques)
-	randIndex := rand.IntN(amountOptions)
-	return types.AllPhishingTechniques[randIndex]
+func GetRandomPhishingTechnique(excludes []string) string {
+	availableTechniques := make([]string, 0)
+	for _, v := range types.AllPhishingTechniques {
+		if !contains(excludes, string(v)) {
+			availableTechniques = append(availableTechniques, string(v))
+		}
+	}
+	randIndex := rand.IntN(len(availableTechniques))
+	return availableTechniques[randIndex]
 }
 
 // GetEducationalAISummary() queries the OPENAI API for the AI summary, returning the `ExplanationDTO` if successful
-func GetEducationalAISummary(phishingTech types.PhishingTechnique, url string) (types.ExplanationDTO, error) {
+func GetEducationalAISummary(phishingTech string, url string) (types.ExplanationDTO, error) {
 	duration := time.Minute * 1
 	ctx, cancelContext := context.WithTimeout(context.Background(), duration)
 	defer cancelContext()
@@ -196,7 +201,7 @@ func GetEducationalAISummary(phishingTech types.PhishingTechnique, url string) (
 }
 
 // GetAIPrompt() returns a string representing an AI prompt
-func GetAIPrompt(phishingTech types.PhishingTechnique, url string) string {
+func GetAIPrompt(phishingTech string, url string) string {
 	technique := string(phishingTech)
 
 	return fmt.Sprintf(`You are a phishing URL generator and cybersecurity educator.
