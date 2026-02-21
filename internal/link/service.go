@@ -207,7 +207,7 @@ func GetAIPrompt(phishingTech string, url string) string {
 	return fmt.Sprintf(`You are a phishing URL generator and cybersecurity educator.
 
 Given the legitimate URL "%s" and the phishing technique "%s", return a JSON object with exactly two fields:
-1. "fake_url": A realistic phishing URL using the specified technique
+1. "fake_link": A realistic phishing URL using the specified technique
 2. "explanation": A 3-4 sentence explanation covering: what technique is used, why it's effective, and how to spot it
 
 Technique definitions:
@@ -221,5 +221,5 @@ Technique definitions:
 - combo-squatting: Append a legitimate-sounding word to the real domain (e.g. amazon.com → amazon-secure.com or amazonlogin.com)
 Do not wrap the response in markdown code fences or backticks. Return raw JSON only
 Respond with ONLY valid JSON, no markdown, no extra text:
-{"fake_url": "...", "explanation": "..."}`, url, technique)
+{"fake_link": "...", "explanation": "..."}`, url, technique)
 }

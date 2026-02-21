@@ -38,15 +38,15 @@ var AllPhishingTechniques = []PhishingTechnique{
 
 // CreateLink represents the incoming request payload to generate a phishing URL.
 type CreateLinkDTO struct {
-	Link    string   `json:"url"`
+	Link    string   `json:"link"`
 	Mode    string   `json:"mode"`
 	Exclude []string `json:"exclude"`
 }
 
 // ReturnLink represents the response payload containing the original and generated phishing URL.
 type ReturnLinkDTO struct {
-	Link        string `json:"url"`
-	FakeURL     string `json:"fake_url"`
+	Link        string `json:"link"`
+	FakeLink    string `json:"fake_link"`
 	Technique   string `json:"technique"`
 	Mode        string `json:"mode"`
 	Explanation string `json:"explanation"`
@@ -54,7 +54,7 @@ type ReturnLinkDTO struct {
 
 // Explanation represents the AI-generated explanation linked to a specific URL mapping.
 type ExplanationDTO struct {
-	FakeLink     string `json:"fake_url"`
+	FakeLink    string `json:"fake_link"`
 	Explanation string `json:"explanation"`
 }
 

@@ -60,7 +60,7 @@ func (linkConn *LinkConn) handleCreateLink(writer http.ResponseWriter, request *
 			json.NewEncoder(writer).Encode(map[string]string{"error": err.Error()})
 			linkConn.logger.Info("Error creating explanationDTO", slog.Any("error", err.Error()))
 		}
-		fmt.Println("fake_url: ", explanationDTO.FakeLink)
+		fmt.Println("fake_link: ", explanationDTO.FakeLink)
 		fmt.Println("explanation", explanationDTO.Explanation)
 	}
 }
