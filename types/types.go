@@ -47,7 +47,7 @@ type CreateLinkDTO struct {
 type ReturnLinkDTO struct {
 	Link        string `json:"link"`
 	FakeLink    string `json:"fake_link"`
-	Technique   string `json:"technique"`
+	Technique   string `json:"technique,omitempty"`
 	Mode        string `json:"mode"`
 	Explanation string `json:"explanation"`
 }
@@ -56,6 +56,10 @@ type ReturnLinkDTO struct {
 type ExplanationDTO struct {
 	FakeLink    string `json:"fake_link"`
 	Explanation string `json:"explanation"`
+}
+
+type PrankDTO struct {
+	Link string `json:"link"`
 }
 
 // ErrorResponse represents an error that occurs during runtime

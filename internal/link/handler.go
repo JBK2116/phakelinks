@@ -59,8 +59,19 @@ func (linkConn *LinkConn) handleCreateLink(writer http.ResponseWriter, request *
 			writer.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(writer).Encode(map[string]string{"error": err.Error()})
 			linkConn.logger.Info("Error creating explanationDTO", slog.Any("error", err.Error()))
+			return
 		}
 		fmt.Println("fake_link: ", explanationDTO.FakeLink)
 		fmt.Println("explanation", explanationDTO.Explanation)
+	} else {
+		prankDTO, err := GetPrankLink(dto.Link)
+		if err != nil {
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(writer).Encode(map[string]string{"error": err.Error()})
+			linkConn.logger.Info("Error creating prankDTO", slog.Any("error", err.Error()))
+			return
+		}
+		fmt.Println("link: ", prankDTO.Link)
 	}
 }

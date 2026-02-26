@@ -200,7 +200,25 @@ func GetEducationalAISummary(phishingTech string, url string) (types.Explanation
 	return dto, nil
 }
 
-// GetAIPrompt() returns a string representing an AI prompt
+func GetPrankLink(url string) (types.PrankDTO, error) {
+	duration := time.Minute * 1
+	ctx, cancelCtx := context.WithTimeout(context.Background(), duration)
+	defer cancelCtx()
+	client := openai.NewClient(option.WithAPIKey(configs.Envs.OPENAI_KEY))
+	question := GetPrankPrompt(url)
+	response, err := client.Responses.New(ctx, responses.ResponseNewParams{
+		Input: responses.ResponseNewParamsInputUnion{OfString: openai.String(question)},
+		Model: openai.ChatModelGPT4o,
+	})
+	var dto types.PrankDTO
+	if err != nil {
+		return dto, err
+	}
+	dto.Link = response.OutputText()
+	return dto, nil
+}
+
+// GetAIPrompt() returns a string representing an AI prompt that returns an educational summary
 func GetAIPrompt(phishingTech string, url string) string {
 	technique := string(phishingTech)
 
@@ -222,4 +240,9 @@ Technique definitions:
 Do not wrap the response in markdown code fences or backticks. Return raw JSON only
 Respond with ONLY valid JSON, no markdown, no extra text:
 {"fake_link": "...", "explanation": "..."}`, url, technique)
+}
+
+// GetPrankPrompt() returns a string representing an AI prompt that returns a sketchy looking link
+func GetPrankPrompt(url string) string {
+	return fmt.Sprintf(`You are a prank link generator. Given the legitimate URL "%s", generate a single fake-looking suspicious link string that appears related to the domain/content of the URL but looks obviously sketchy (e.g. if given amazon.com, return something like amazon-free-gift-exe.zip or amazon_login_verify-132.exe.zip). Return only the raw link string, no JSON, no explanation, no markdown.`, url)
 }
