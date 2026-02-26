@@ -197,6 +197,7 @@ func GetEducationalAISummary(phishingTech string, url string) (types.Explanation
 	if err := json.Unmarshal([]byte(response.OutputText()), &dto); err != nil {
 		return dto, err
 	}
+	dto.Technique = phishingTech
 	return dto, nil
 }
 

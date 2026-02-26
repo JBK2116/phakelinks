@@ -3,7 +3,6 @@ package link
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"log/slog"
 	"net/http"
 
@@ -51,6 +50,7 @@ func (linkConn *LinkConn) handleCreateLink(writer http.ResponseWriter, request *
 		return
 	}
 
+	var returnDTO types.ReturnLinkDTO
 	if dto.Mode == string(types.Educational) {
 		randPhishingTechnique := GetRandomPhishingTechnique(dto.Exclude)
 		explanationDTO, err := GetEducationalAISummary(randPhishingTechnique, dto.Link)
@@ -61,8 +61,9 @@ func (linkConn *LinkConn) handleCreateLink(writer http.ResponseWriter, request *
 			linkConn.logger.Info("Error creating explanationDTO", slog.Any("error", err.Error()))
 			return
 		}
-		fmt.Println("fake_link: ", explanationDTO.FakeLink)
-		fmt.Println("explanation", explanationDTO.Explanation)
+		returnDTO.FakeLink = explanationDTO.FakeLink
+		returnDTO.Technique = explanationDTO.Technique
+		returnDTO.Explanation = explanationDTO.Explanation
 	} else {
 		prankDTO, err := GetPrankLink(dto.Link)
 		if err != nil {
@@ -72,6 +73,11 @@ func (linkConn *LinkConn) handleCreateLink(writer http.ResponseWriter, request *
 			linkConn.logger.Info("Error creating prankDTO", slog.Any("error", err.Error()))
 			return
 		}
-		fmt.Println("link: ", prankDTO.Link)
+		returnDTO.FakeLink = prankDTO.Link
 	}
+	returnDTO.Link = dto.Link
+	returnDTO.Mode = dto.Mode
+	writer.Header().Set("Content-Type", "application/json")
+	writer.WriteHeader(http.StatusOK)
+	json.NewEncoder(writer).Encode(returnDTO)
 }

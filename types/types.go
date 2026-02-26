@@ -49,12 +49,13 @@ type ReturnLinkDTO struct {
 	FakeLink    string `json:"fake_link"`
 	Technique   string `json:"technique,omitempty"`
 	Mode        string `json:"mode"`
-	Explanation string `json:"explanation"`
+	Explanation string `json:"explanation,omitempty"`
 }
 
 // Explanation represents the AI-generated explanation linked to a specific URL mapping.
 type ExplanationDTO struct {
 	FakeLink    string `json:"fake_link"`
+	Technique   string `json:"technique,omitempty"`
 	Explanation string `json:"explanation"`
 }
 
