@@ -1,7 +1,6 @@
 package link
 
 import (
-	"database/sql"
 	"encoding/json"
 	"log/slog"
 	"net/http"
@@ -13,13 +12,11 @@ import (
 // LinkConn holds the database connection for link-related queries.
 type LinkConn struct {
 	logger *slog.Logger
-	db     *sql.DB
 }
 
 // NewLinkConn() creates a new LinkConn with the provided database connection.
-func NewLinkConn(db *sql.DB, logger *slog.Logger) *LinkConn {
+func NewLinkConn(logger *slog.Logger) *LinkConn {
 	return &LinkConn{
-		db:     db,
 		logger: logger,
 	}
 }
