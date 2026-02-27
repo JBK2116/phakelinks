@@ -49,7 +49,7 @@ func (server *APIServer) Run() error {
 	wrappedRouter := middleware.StripTrailingSlashMiddleware(router) // router wrapping is needed here to ensure that middleware runs BEFORE matching to the path
 	subrouter := router.PathPrefix("/api/v1/").Subrouter()
 
-	linkConn := link.NewLinkConn(server.logger)
+	linkConn := link.NewLinkConn(server.logger, server.db)
 	linkConn.RegisterRoutes(subrouter)
 	return http.ListenAndServe(server.address, wrappedRouter)
 }

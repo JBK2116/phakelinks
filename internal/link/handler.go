@@ -1,6 +1,7 @@
 package link
 
 import (
+	"database/sql"
 	"encoding/json"
 	"log/slog"
 	"net/http"
@@ -12,12 +13,14 @@ import (
 // LinkConn holds the database connection for link-related queries.
 type LinkConn struct {
 	logger *slog.Logger
+	db     *sql.DB
 }
 
 // NewLinkConn() creates a new LinkConn with the provided database connection.
-func NewLinkConn(logger *slog.Logger) *LinkConn {
+func NewLinkConn(logger *slog.Logger, db *sql.DB) *LinkConn {
 	return &LinkConn{
 		logger: logger,
+		db:     db,
 	}
 }
 
@@ -68,6 +71,13 @@ func (linkConn *LinkConn) handleCreateLink(writer http.ResponseWriter, request *
 			writer.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(writer).Encode(map[string]string{"error": err.Error()})
 			linkConn.logger.Info("Error creating prankDTO", slog.Any("error", err.Error()))
+			return
+		}
+		if err := InsertLink(linkConn.db, dto.Link, prankDTO.Link); err != nil {
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(writer).Encode(map[string]string{"error": err.Error()})
+			linkConn.logger.Info("Error inserting link into database", slog.Any("error", err.Error()))
 			return
 		}
 		returnDTO.FakeLink = prankDTO.Link
