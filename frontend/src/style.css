@@ -1,0 +1,969 @@
+/* ─── Fonts ──────────────────────────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap');
+
+/* ─── Variables ──────────────────────────────────────────────────────────────── */
+:root {
+    --bg: #06080b;
+    --surface: #0c1018;
+    --surface2: #111820;
+    --surface3: #161f2a;
+    --border: #1a2535;
+    --border-bright: #243447;
+
+    --edu: #00e5c8;
+    --edu-dim: rgba(0, 229, 200, 0.15);
+    --edu-glow: 0 0 30px rgba(0, 229, 200, 0.2);
+
+    --prank: #ff3f72;
+    --prank-dim: rgba(255, 63, 114, 0.15);
+    --prank-glow: 0 0 30px rgba(255, 63, 114, 0.2);
+
+    --accent: var(--edu);
+    --accent-dim: var(--edu-dim);
+    --accent-glow: var(--edu-glow);
+
+    --text: #8fa8c0;
+    --text-mid: #b0c8de;
+    --text-bright: #e0eef8;
+    --text-dim: #2d4155;
+
+    --mono: 'Share Tech Mono', monospace;
+    --display: 'Orbitron', sans-serif;
+    --body: 'DM Sans', sans-serif;
+
+    --radius: 2px;
+    --transition: 0.22s ease;
+}
+
+[data-mode='prank'] {
+    --accent: var(--prank);
+    --accent-dim: var(--prank-dim);
+    --accent-glow: var(--prank-glow);
+}
+
+/* ─── Reset ──────────────────────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+html {
+    height: 100%;
+}
+body {
+    font-family: var(--body);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+    cursor: crosshair;
+}
+
+/* ─── Noise Canvas ───────────────────────────────────────────────────────────── */
+#noise-canvas {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.5;
+}
+
+/* ─── Grid Overlay ───────────────────────────────────────────────────────────── */
+.grid-overlay {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    background-image:
+        linear-gradient(rgba(0, 229, 200, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 229, 200, 0.025) 1px, transparent 1px);
+    background-size: 48px 48px;
+}
+
+[data-mode='prank'] .grid-overlay {
+    background-image:
+        linear-gradient(rgba(255, 63, 114, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 63, 114, 0.025) 1px, transparent 1px);
+}
+
+/* Scanlines */
+body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 2;
+    background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 3px,
+        rgba(0, 0, 0, 0.08) 3px,
+        rgba(0, 0, 0, 0.08) 4px
+    );
+}
+
+/* ─── Site Header ────────────────────────────────────────────────────────────── */
+.site-header {
+    position: relative;
+    z-index: 10;
+    text-align: center;
+    padding: 64px 24px 0;
+    animation: fadeDown 0.8s ease both;
+}
+
+.logo {
+    font-family: var(--display);
+    font-size: clamp(2rem, 6vw, 3.8rem);
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    color: var(--text-bright);
+    line-height: 1;
+}
+
+.logo-bracket {
+    color: var(--accent);
+    text-shadow: var(--accent-glow);
+    transition:
+        color var(--transition),
+        text-shadow var(--transition);
+}
+
+.logo-accent {
+    color: var(--accent);
+    text-shadow: var(--accent-glow);
+    transition:
+        color var(--transition),
+        text-shadow var(--transition);
+}
+
+.tagline {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    margin-top: 10px;
+    letter-spacing: 0.08em;
+    animation: fadeDown 0.8s 0.15s ease both;
+}
+
+/* ─── Main Content ───────────────────────────────────────────────────────────── */
+.main-content {
+    position: relative;
+    z-index: 10;
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 56px 24px 80px;
+    animation: fadeUp 0.8s 0.2s ease both;
+}
+
+/* ─── Corner Decorations ─────────────────────────────────────────────────────── */
+.corner-decor {
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    border-color: var(--accent);
+    border-style: solid;
+    opacity: 0.4;
+    transition:
+        border-color var(--transition),
+        opacity var(--transition);
+    pointer-events: none;
+}
+.corner-decor:hover {
+    opacity: 0.9;
+}
+.top-left {
+    top: -8px;
+    left: -8px;
+    border-width: 1px 0 0 1px;
+}
+.top-right {
+    top: -8px;
+    right: -8px;
+    border-width: 1px 1px 0 0;
+}
+.bottom-left {
+    bottom: -8px;
+    left: -8px;
+    border-width: 0 0 1px 1px;
+}
+.bottom-right {
+    bottom: -8px;
+    right: -8px;
+    border-width: 0 1px 1px 0;
+}
+
+/* ─── Mode Toggle ────────────────────────────────────────────────────────────── */
+.mode-toggle-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 20px;
+}
+
+.mode-label {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+    white-space: nowrap;
+}
+
+.mode-toggle {
+    display: flex;
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 3px;
+    gap: 2px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.toggle-option {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    padding: 7px 16px;
+    border-radius: var(--radius);
+    color: var(--text-dim);
+    transition:
+        color var(--transition),
+        background var(--transition);
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.toggle-option.active {
+    color: var(--bg);
+    background: var(--accent);
+    text-shadow: none;
+    box-shadow: 0 0 12px rgba(0, 229, 200, 0.3);
+    transition:
+        color var(--transition),
+        background var(--transition),
+        box-shadow var(--transition);
+}
+
+[data-mode='prank'] .toggle-option.active {
+    box-shadow: 0 0 12px rgba(255, 63, 114, 0.3);
+}
+
+.toggle-option:not(.active):hover {
+    color: var(--text-mid);
+}
+
+/* ─── Mode Description ───────────────────────────────────────────────────────── */
+.mode-description {
+    font-size: 0.88rem;
+    color: var(--text);
+    line-height: 1.6;
+    margin-bottom: 36px;
+    padding-left: 2px;
+    min-height: 2.8em;
+    transition: opacity 0.2s ease;
+}
+.mode-description.fade-out {
+    opacity: 0;
+}
+
+/* ─── Input Section ──────────────────────────────────────────────────────────── */
+.input-section {
+    display: flex;
+    gap: 12px;
+    align-items: stretch;
+}
+
+.input-wrapper {
+    flex: 1;
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    transition:
+        border-color var(--transition),
+        box-shadow var(--transition);
+}
+
+.input-wrapper.focused {
+    border-color: var(--accent);
+    box-shadow:
+        var(--accent-glow),
+        inset 0 0 0 1px var(--accent-dim);
+}
+
+.input-prefix {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--accent);
+    padding: 0 12px 0 16px;
+    white-space: nowrap;
+    letter-spacing: 0.06em;
+    transition: color var(--transition);
+    pointer-events: none;
+}
+
+.url-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-family: var(--mono);
+    font-size: 0.88rem;
+    color: var(--text-bright);
+    padding: 16px 16px 16px 0;
+    caret-color: var(--accent);
+    letter-spacing: 0.03em;
+}
+
+.url-input::placeholder {
+    color: var(--text-dim);
+    font-style: italic;
+}
+
+/* Scan line that animates inside input when focused */
+.input-scan-line {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    width: 0;
+    background: var(--accent);
+    transition:
+        width 0.4s ease,
+        background var(--transition);
+    box-shadow: 0 0 8px var(--accent);
+}
+.input-wrapper.focused .input-scan-line {
+    width: 100%;
+}
+
+/* ─── Submit Button ──────────────────────────────────────────────────────────── */
+.submit-btn {
+    position: relative;
+    background: var(--accent-dim);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.14em;
+    padding: 0 28px;
+    cursor: pointer;
+    border-radius: var(--radius);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition:
+        background var(--transition),
+        box-shadow var(--transition),
+        color var(--transition);
+    white-space: nowrap;
+}
+
+.submit-btn:hover {
+    background: var(--accent);
+    color: var(--bg);
+    box-shadow: var(--accent-glow);
+}
+
+.btn-arrow {
+    transition: transform 0.2s ease;
+}
+
+.submit-btn:hover .btn-arrow {
+    transform: translateX(4px);
+}
+
+.submit-btn.glitch .btn-text {
+    animation: textGlitch 0.3s steps(2) infinite;
+}
+
+.btn-glitch {
+    position: absolute;
+    inset: 0;
+    background: var(--accent);
+    opacity: 0;
+    pointer-events: none;
+    mix-blend-mode: overlay;
+}
+
+.submit-btn:active .btn-glitch {
+    animation: btnFlash 0.15s ease;
+}
+
+/* ─── Loading Overlay ────────────────────────────────────────────────────────── */
+.overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(6, 8, 11, 0.88);
+    backdrop-filter: blur(6px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.overlay.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.loading-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.loading-spinner {
+    position: relative;
+    width: 72px;
+    height: 72px;
+}
+
+.spinner-ring {
+    position: absolute;
+    inset: 0;
+    border: 1.5px solid transparent;
+    border-top-color: var(--edu);
+    border-radius: 50%;
+    animation: spinRing 1s linear infinite;
+}
+
+.ring2 {
+    inset: 10px;
+    border-top-color: transparent;
+    border-right-color: var(--edu);
+    opacity: 0.6;
+    animation-duration: 1.4s;
+    animation-direction: reverse;
+}
+
+.ring3 {
+    inset: 20px;
+    border-top-color: var(--edu);
+    opacity: 0.3;
+    animation-duration: 0.7s;
+}
+
+[data-mode='prank'] .spinner-ring,
+[data-mode='prank'] .ring2,
+[data-mode='prank'] .ring3 {
+    border-top-color: var(--prank);
+}
+[data-mode='prank'] .ring2 {
+    border-top-color: transparent;
+    border-right-color: var(--prank);
+}
+
+.loading-text {
+    font-family: var(--mono);
+    font-size: 0.88rem;
+    color: var(--accent);
+    letter-spacing: 0.16em;
+    transition: color var(--transition);
+}
+
+.loading-bar-track {
+    width: 200px;
+    height: 2px;
+    background: var(--border);
+    border-radius: 99px;
+    overflow: hidden;
+}
+
+.loading-bar-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 99px;
+    animation: loadBar 2.5s ease-in-out infinite;
+    box-shadow: 0 0 8px var(--accent);
+    transition: background var(--transition);
+}
+
+.loading-sub {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+}
+
+/* ─── Modals ─────────────────────────────────────────────────────────────────── */
+.modal {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--border-bright);
+    border-radius: var(--radius);
+    padding: 36px 36px 28px;
+    max-width: 620px;
+    width: calc(100% - 32px);
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow:
+        0 0 60px rgba(0, 0, 0, 0.8),
+        var(--edu-glow);
+    animation: modalIn 0.35s cubic-bezier(0.2, 0, 0, 1) both;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+}
+
+.prank-modal {
+    box-shadow:
+        0 0 60px rgba(0, 0, 0, 0.8),
+        var(--prank-glow);
+}
+
+.error-modal {
+    text-align: center;
+    max-width: 420px;
+}
+
+.modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    width: 28px;
+    height: 28px;
+    font-size: 0.7rem;
+    cursor: pointer;
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition:
+        border-color var(--transition),
+        color var(--transition),
+        background var(--transition);
+}
+
+.modal-close:hover {
+    border-color: var(--edu);
+    color: var(--edu);
+    background: var(--edu-dim);
+}
+
+.prank-close:hover {
+    border-color: var(--prank);
+    color: var(--prank);
+    background: var(--prank-dim);
+}
+
+.modal-tag {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    color: var(--edu);
+    letter-spacing: 0.14em;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.prank-tag {
+    color: var(--prank);
+}
+.error-tag {
+    color: var(--prank);
+}
+
+.modal-title {
+    font-family: var(--display);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-bright);
+    letter-spacing: 0.06em;
+    margin-bottom: 28px;
+}
+
+.prank-title {
+    color: var(--prank);
+    text-shadow: 0 0 20px rgba(255, 63, 114, 0.3);
+}
+
+/* ─── Edu Grid ───────────────────────────────────────────────────────────────── */
+.edu-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.edu-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s ease;
+}
+
+.edu-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 2px;
+    height: 100%;
+    background: var(--edu);
+    opacity: 0.3;
+}
+
+.edu-card.highlight {
+    border-color: var(--border-bright);
+}
+.edu-card.highlight::before {
+    opacity: 0.8;
+    box-shadow: 0 0 8px var(--edu);
+}
+
+.edu-card.full-width {
+    grid-column: 1 / -1;
+}
+
+.card-label {
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    color: var(--text-dim);
+    letter-spacing: 0.14em;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.card-value {
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    color: var(--text-mid);
+    word-break: break-all;
+    line-height: 1.5;
+}
+
+.original-link {
+    color: var(--text);
+}
+.fake-link {
+    color: var(--prank);
+}
+
+.technique-tag {
+    display: inline-block;
+    background: var(--edu-dim);
+    border: 1px solid var(--edu);
+    color: var(--edu);
+    padding: 4px 12px;
+    font-size: 0.76rem;
+    letter-spacing: 0.1em;
+    border-radius: 99px;
+}
+
+.explanation-text {
+    font-family: var(--body);
+    font-size: 0.88rem;
+    color: var(--text-mid);
+    line-height: 1.7;
+}
+
+.modal-footer {
+    border-top: 1px solid var(--border);
+    padding-top: 16px;
+    text-align: right;
+}
+
+.footer-note {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+}
+
+/* ─── Copy Button ────────────────────────────────────────────────────────────── */
+.copy-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+    padding: 4px 10px;
+    cursor: pointer;
+    border-radius: var(--radius);
+    margin-top: 10px;
+    transition:
+        border-color var(--transition),
+        color var(--transition),
+        background var(--transition);
+}
+
+.copy-btn:hover {
+    border-color: var(--edu);
+    color: var(--edu);
+    background: var(--edu-dim);
+}
+
+.copy-btn.copied {
+    border-color: var(--edu);
+    color: var(--edu);
+    background: var(--edu-dim);
+}
+
+/* ─── Prank Modal ────────────────────────────────────────────────────────────── */
+.prank-warning-strip {
+    background: var(--prank);
+    color: var(--bg);
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+    padding: 6px 0;
+    white-space: nowrap;
+    overflow: hidden;
+    margin: 0 -36px 20px;
+    animation: marquee 8s linear infinite;
+    transform: translateX(100%);
+}
+
+.prank-link-box {
+    background: var(--surface2);
+    border: 1px solid var(--prank);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow:
+        inset 0 0 20px rgba(255, 63, 114, 0.05),
+        0 0 20px rgba(255, 63, 114, 0.1);
+}
+
+.prank-link-text {
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    color: var(--prank);
+    word-break: break-all;
+    line-height: 1.6;
+    text-shadow: 0 0 8px rgba(255, 63, 114, 0.4);
+}
+
+.prank-copy-btn {
+    width: 100%;
+    padding: 14px;
+    font-size: 0.8rem;
+    border: 1px solid var(--prank);
+    color: var(--prank);
+    background: var(--prank-dim);
+    font-family: var(--mono);
+    letter-spacing: 0.14em;
+    cursor: pointer;
+    border-radius: var(--radius);
+    transition:
+        background var(--transition),
+        box-shadow var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.prank-copy-btn:hover {
+    background: var(--prank);
+    color: var(--bg);
+    box-shadow: var(--prank-glow);
+}
+
+.prank-copy-btn.copied {
+    background: var(--prank);
+    color: var(--bg);
+}
+
+.prank-disclaimer {
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    text-align: center;
+    margin-top: 16px;
+    font-style: italic;
+}
+
+/* ─── Error Modal ────────────────────────────────────────────────────────────── */
+.error-icon {
+    width: 52px;
+    height: 52px;
+    border: 1.5px solid var(--prank);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--display);
+    font-size: 1.4rem;
+    font-weight: 900;
+    color: var(--prank);
+    margin: 0 auto 16px;
+    box-shadow: 0 0 20px rgba(255, 63, 114, 0.2);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.error-message {
+    font-size: 0.9rem;
+    color: var(--text-mid);
+    line-height: 1.6;
+    margin: 12px 0 24px;
+}
+
+.error-retry-btn {
+    width: 100%;
+    padding: 14px;
+    justify-content: center;
+}
+
+/* ─── Animations ─────────────────────────────────────────────────────────────── */
+@keyframes fadeDown {
+    from {
+        opacity: 0;
+        transform: translateY(-16px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes spinRing {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes loadBar {
+    0% {
+        width: 0%;
+        margin-left: 0;
+    }
+    50% {
+        width: 70%;
+        margin-left: 0;
+    }
+    80% {
+        width: 20%;
+        margin-left: 80%;
+    }
+    100% {
+        width: 0%;
+        margin-left: 100%;
+    }
+}
+
+@keyframes modalIn {
+    from {
+        opacity: 0;
+        transform: translateY(24px) scale(0.97);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes marquee {
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(-50%);
+    }
+}
+
+@keyframes pulse {
+    0%,
+    100% {
+        box-shadow: 0 0 20px rgba(255, 63, 114, 0.2);
+    }
+    50% {
+        box-shadow: 0 0 32px rgba(255, 63, 114, 0.4);
+    }
+}
+
+@keyframes textGlitch {
+    0% {
+        transform: translate(1px, 0);
+        opacity: 0.9;
+    }
+    50% {
+        transform: translate(-1px, 0);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(0, 0);
+        opacity: 0.95;
+    }
+}
+
+@keyframes btnFlash {
+    from {
+        opacity: 0.3;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+/* ─── Scrollbar ──────────────────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+    width: 4px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 99px;
+}
+
+/* ─── Responsive ─────────────────────────────────────────────────────────────── */
+@media (max-width: 560px) {
+    .input-section {
+        flex-direction: column;
+    }
+    .submit-btn {
+        padding: 16px;
+        justify-content: center;
+    }
+    .edu-grid {
+        grid-template-columns: 1fr;
+    }
+    .edu-card.full-width {
+        grid-column: 1;
+    }
+    .modal {
+        padding: 28px 20px 20px;
+    }
+    .prank-warning-strip {
+        margin: 0 -20px 16px;
+    }
+    .mode-toggle-wrapper {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .logo {
+        font-size: 1.8rem;
+    }
+}
