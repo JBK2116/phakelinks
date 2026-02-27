@@ -14,6 +14,11 @@ type Config struct {
 	PublicPort       string
 	OPENAI_KEY       string
 	CLOUDMERSIVE_KEY string
+	DBHost           string
+	DBPort           int64
+	DBUser           string
+	DBPassword       string
+	DBName           string
 }
 
 // Envs represents the access point for using all configuration variables
@@ -25,10 +30,15 @@ func initConfig() Config {
 
 	return Config{
 		IsDev:            getEnvBool("IsDev", true),
-		PublicHost:       getEnv("PublicHost", "http://localhost"),
-		PublicPort:       getEnv("PublicPort", "8080"),
+		PublicHost:       getEnv("PublicHost", "PublicHost"),
+		PublicPort:       getEnv("PublicPort", "PublicPort"),
 		OPENAI_KEY:       getEnv("OPENAI_KEY", "OPENAI_KEY"),
 		CLOUDMERSIVE_KEY: getEnv("CLOUDMERSIVE_KEY", "CLOUDMERSIVE_KEY"),
+		DBHost:           getEnv("DBHost", "DBHost"),
+		DBPort:           getEnvAsint("DBPort", -1),
+		DBUser:           getEnv("DBUser", "DBUser"),
+		DBPassword:       getEnv("DBPassword", "DBPassword"),
+		DBName:           getEnv("DBName", "DBName"),
 	}
 }
 
@@ -37,7 +47,17 @@ func getEnv(key, fallback string) string {
 	if value, ok := os.LookupEnv(key); ok {
 		return value
 	}
+	return fallback
+}
 
+// getEnvAsint() returns the value of the provided key if found as an int64 data type
+func getEnvAsint(key string, fallback int64) int64 {
+	if value, ok := os.LookupEnv(key); ok {
+		if intValue, err := strconv.ParseInt(value, 10, 64); err == nil {
+			return intValue
+		}
+		return fallback
+	}
 	return fallback
 }
 

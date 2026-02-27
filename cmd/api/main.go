@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -13,10 +14,13 @@ import (
 
 func main() {
 	logger := configs.NewLogger(configs.Envs.IsDev)
-
+	db, err := configs.NewDBConn()
+	if err != nil {
+		panic(err)
+	}
 	logger.Info("Database successfully connected")
 
-	server := NewAPIServer(fmt.Sprintf(":%s", configs.Envs.PublicPort), logger)
+	server := NewAPIServer(fmt.Sprintf(":%s", configs.Envs.PublicPort), logger, db)
 	logger.Info("Server running", slog.String("host", configs.Envs.PublicHost), slog.String("port", configs.Envs.PublicPort))
 	if err := server.Run(); err != nil && err != http.ErrServerClosed {
 		logger.Error("Error during server startup", slog.Any("error", err))
@@ -27,13 +31,15 @@ func main() {
 type APIServer struct {
 	address string
 	logger  *slog.Logger
+	db      *sql.DB
 }
 
 // NewAPIServer() returns a new APIServer instance
-func NewAPIServer(address string, logger *slog.Logger) *APIServer {
+func NewAPIServer(address string, logger *slog.Logger, db *sql.DB) *APIServer {
 	return &APIServer{
 		address: address,
 		logger:  logger,
+		db:      db,
 	}
 }
 

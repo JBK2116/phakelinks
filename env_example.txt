@@ -10,3 +10,10 @@ OPENAI_KEY=""
 
 # Cloudmersive API
 CLOUDMERSIVE_KEY="919bcd50-4f8c-4ef2-9a16-a14acc7de73e"
+
+# DB Config
+DBHost=
+DBPort=
+DBUser=
+DBPassword=
+DBName=
