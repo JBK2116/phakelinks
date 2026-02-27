@@ -2,7 +2,7 @@
 import {
     initUI,
     getMode,
-    getUrl,
+    getlink,
     showLoading,
     hideLoading,
     showEducationalResult,
@@ -14,14 +14,14 @@ import {
 initUI();
 
 // Global Variables
-const excludeTecniques = [];
+let exclude = [];
 
-// ─── Submit Handler ───────────────────────────────────────────────────────────
+// Submit Handler
 document.getElementById('submitBtn').addEventListener('click', async () => {
-    const url = getUrl();
+    const link = getlink();
     const mode = getMode();
 
-    if (!url) {
+    if (!link) {
         showError('Please enter a URL or domain before analyzing.');
         return;
     }
@@ -29,51 +29,47 @@ document.getElementById('submitBtn').addEventListener('click', async () => {
     showLoading();
 
     try {
-        // ── YOUR AJAX GOES HERE ──────────────────────────────────────────────────
-        //
-        // const response = await fetch('/api/analyze', {
-        //   method: 'POST',
-        //   headers: { 'Content-Type': 'application/json' },
-        //   body: JSON.stringify({ url, mode })
-        // });
-        //
-        // if (!response.ok) throw new Error(`Server error: ${response.status}`);
-        // const data = await response.json();
-        //
-        // if (mode === 'educational') {
-        //   showEduResult({
-        //     originalLink: data.originalLink,
-        //     fakeLink: data.fakeLink,
-        //     technique: data.technique,
-        //     explanation: data.explanation
-        //   });
-        // } else {
-        //   showPrankResult(data.fakeLink);
-        // }
-        // ── END YOUR AJAX ────────────────────────────────────────────────────────
+        const response = await fetch('/api/v1/links', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ link, mode, exclude }),
+        });
 
-        // DEMO: remove this block once you wire up your backend
-        await new Promise((r) => setTimeout(r, 2200));
+        if (!response.ok) throw new Error(`Server error: ${response.status}`);
+        const data = await response.json();
+
         if (mode === 'educational') {
+            addToExclude(data.technique);
+            resetExclude();
             showEducationalResult({
-                originalLink: url,
-                fakeLink:
-                    url.replace(/\./g, '-').replace('https://', 'http://') +
-                    '.verify-account.ru',
-                technique: 'Homoglyph + Subdomain Spoofing',
-                explanation:
-                    'This technique replaces visually similar characters and adds a convincing subdomain to trick users into thinking they are visiting a legitimate site. The domain registers a look-alike that exploits split-second visual scanning — most users never read past the first few characters of a URL.',
+                originalLink: data.link,
+                fakeLink: data.fake_link,
+                technique: data.technique,
+                explanation: data.explanation,
             });
         } else {
-            showPrankResult(
-                'http://totally-not-a-virus.ru/you-won-free-iphone/claim?token=xX_' +
-                    Math.random().toString(36).slice(2) +
-                    '_Xx&ref=yourcredit&redirect=definitely-safe.biz',
-            );
+            showPrankResult(data.fake_link);
         }
+        hideLoading();
     } catch (err) {
         showError(
             err.message || 'Failed to reach the server. Check your connection.',
         );
     }
 });
+
+/**
+ * This function resets the exclude array if it surpasses 8 members
+ */
+function resetExclude() {
+    if (exclude.length >= 8) {
+        exclude = [];
+    }
+}
+
+/**
+ * This function adds a new technique string to the exclude array
+ */
+function addToExclude(technique) {
+    exclude.push(technique);
+}

@@ -223,7 +223,7 @@ export function getMode() {
     return currentMode;
 }
 
-export function getUrl() {
+export function getlink() {
     return document.getElementById('urlInput')?.value?.trim() || '';
 }
 
