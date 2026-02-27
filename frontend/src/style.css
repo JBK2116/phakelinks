@@ -731,8 +731,13 @@ body::after {
     white-space: nowrap;
     overflow: hidden;
     margin: 0 -36px 20px;
-    animation: marquee 8s linear infinite;
-    transform: translateX(100%);
+    display: flex;
+}
+
+.prank-warning-strip span {
+    display: inline-block;
+    flex-shrink: 0;
+    animation: marquee 10s linear infinite;
 }
 
 .prank-link-box {
@@ -888,7 +893,7 @@ body::after {
         transform: translateX(0);
     }
     to {
-        transform: translateX(-50%);
+        transform: translateX(-100%);
     }
 }
 

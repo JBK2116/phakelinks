@@ -133,11 +133,14 @@ export function initUI() {
 
         <div class="modal-header">
           <span class="modal-tag prank-tag">// PRANK LINK GENERATED</span>
-          <h2 class="modal-title prank-title">Send it. 😈</h2>
+          <h2 class="modal-title prank-title">Send it.</h2>
         </div>
 
         <div class="prank-link-display">
-          <div class="prank-warning-strip">⚠ LOOKS SKETCHY ⚠ PROCEED WITH CAUTION ⚠ LOOKS SKETCHY ⚠ PROCEED WITH CAUTION ⚠</div>
+        <div class="prank-warning-strip">
+          <span>⚠ LOOKS SKETCHY ⚠ PROCEED WITH CAUTION ⚠ LOOKS SKETCHY ⚠ PROCEED WITH CAUTION &nbsp;&nbsp;&nbsp;</span>
+          <span>⚠ LOOKS SKETCHY ⚠ PROCEED WITH CAUTION ⚠ LOOKS SKETCHY ⚠ PROCEED WITH CAUTION &nbsp;&nbsp;&nbsp;</span>
+        </div>
           <div class="prank-link-box">
             <p class="prank-link-text" id="prankLinkText">—</p>
           </div>
