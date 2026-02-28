@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"os"
 
 	"github.com/JBK2116/phakelinks/internal/configs"
 	"github.com/JBK2116/phakelinks/internal/link"
@@ -19,11 +20,18 @@ func main() {
 		panic(err)
 	}
 	logger.Info("Database successfully connected")
+	errCh := make(chan error, 2)
 
-	server := NewAPIServer(fmt.Sprintf(":%s", configs.Envs.PublicPort), logger, db)
-	logger.Info("Server running", slog.String("host", configs.Envs.PublicHost), slog.String("port", configs.Envs.PublicPort))
-	if err := server.Run(); err != nil && err != http.ErrServerClosed {
-		logger.Error("Error during server startup", slog.Any("error", err))
+	mainServer := NewAPIServer(fmt.Sprintf(":%s", configs.Envs.PublicPort), logger, db)
+	redirectServer := NewAPIServer(fmt.Sprintf(":%s", configs.Envs.RedirectPort), logger, db)
+	logger.Info("Main Server running", slog.String("host", configs.Envs.PublicHost), slog.String("port", configs.Envs.PublicPort))
+	logger.Info("Redirect Server running", slog.String("host", configs.Envs.RedirectHost), slog.String("port", configs.Envs.RedirectPort))
+	go func() { errCh <- mainServer.Run() }()
+	go func() { errCh <- redirectServer.RunRedirect() }()
+	if err := <-errCh; err != nil && err != http.ErrServerClosed {
+		logger.Error("Server Failed. Shutting Down ...", slog.String("error", err.Error()))
+		close(errCh)
+		os.Exit(1)
 	}
 }
 
@@ -51,5 +59,13 @@ func (server *APIServer) Run() error {
 
 	linkConn := link.NewLinkConn(server.logger, server.db)
 	linkConn.RegisterRoutes(subrouter)
+	return http.ListenAndServe(server.address, wrappedRouter)
+}
+
+func (server *APIServer) RunRedirect() error {
+	router := mux.NewRouter()
+	wrappedRouter := middleware.StripTrailingSlashMiddleware(router)
+	linkConn := link.NewLinkConn(server.logger, server.db)
+	linkConn.RegisterRedirectRoutes(router)
 	return http.ListenAndServe(server.address, wrappedRouter)
 }

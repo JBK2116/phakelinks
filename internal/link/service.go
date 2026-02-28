@@ -215,7 +215,12 @@ func GetPrankLink(url string) (types.PrankDTO, error) {
 	if err != nil {
 		return dto, err
 	}
-	dto.Link = response.OutputText()
+	if configs.Envs.IsDev {
+		dto.Link = fmt.Sprintf("%s:%s/%s", configs.Envs.RedirectHost, configs.Envs.RedirectPort, response.OutputText())
+	} else {
+		dto.Link = fmt.Sprintf("%s/%s", configs.Envs.RedirectHost, response.OutputText())
+	}
+	dto.Slug = strings.TrimSpace(response.OutputText())
 	return dto, nil
 }
 

@@ -3,9 +3,12 @@ package link
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"log/slog"
 	"net/http"
+	"strings"
 
+	"github.com/JBK2116/phakelinks/internal/configs"
 	"github.com/JBK2116/phakelinks/types"
 	"github.com/gorilla/mux"
 )
@@ -27,6 +30,10 @@ func NewLinkConn(logger *slog.Logger, db *sql.DB) *LinkConn {
 // RegisterRoutes() registers all routes for the LinkConn struct
 func (linkConn *LinkConn) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/links", linkConn.handleCreateLink).Methods("POST")
+}
+
+func (linkConn *LinkConn) RegisterRedirectRoutes(router *mux.Router) {
+	router.HandleFunc("/{path:.+}", linkConn.handleRedirect).Methods("GET")
 }
 
 // handleCreateLink() handles the business logic for creating a new link
@@ -73,7 +80,7 @@ func (linkConn *LinkConn) handleCreateLink(writer http.ResponseWriter, request *
 			linkConn.logger.Info("Error creating prankDTO", slog.Any("error", err.Error()))
 			return
 		}
-		if err := InsertLink(linkConn.db, dto.Link, prankDTO.Link); err != nil {
+		if err := InsertLink(linkConn.db, dto.Link, prankDTO.Slug); err != nil {
 			writer.Header().Set("Content-Type", "application/json")
 			writer.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(writer).Encode(map[string]string{"error": err.Error(), "message": "Something went wrong while creating the link. Please try again."})
@@ -87,4 +94,21 @@ func (linkConn *LinkConn) handleCreateLink(writer http.ResponseWriter, request *
 	writer.Header().Set("Content-Type", "application/json")
 	writer.WriteHeader(http.StatusOK)
 	json.NewEncoder(writer).Encode(returnDTO)
+}
+
+// handleRedirect() handles the redirect server of the application
+func (linkConn *LinkConn) handleRedirect(writer http.ResponseWriter, request *http.Request) {
+	vars := mux.Vars(request)
+	path := vars["path"]
+	originalLink, err := GetLink(linkConn.db, path)
+	if !strings.HasPrefix(originalLink, "https://") {
+		originalLink = fmt.Sprintf("https://%s", originalLink)
+	}
+	if err != nil {
+		linkConn.logger.Info("Error retrieving original link from database", slog.Any("error", err.Error()))
+		http.Redirect(writer, request, configs.Envs.FrontendHost, 308)
+		return
+	}
+	linkConn.logger.Info("Redirecting User", slog.String("url", originalLink))
+	http.Redirect(writer, request, originalLink, 308)
 }

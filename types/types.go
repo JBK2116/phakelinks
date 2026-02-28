@@ -61,6 +61,7 @@ type ExplanationDTO struct {
 
 type PrankDTO struct {
 	Link string `json:"link"`
+	Slug string `json:"slug,omitempty"`
 }
 
 // ErrorResponse represents an error that occurs during runtime

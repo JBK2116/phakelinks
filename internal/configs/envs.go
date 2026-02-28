@@ -10,8 +10,11 @@ import (
 // Config represents all configuration variables needed to run this application
 type Config struct {
 	IsDev            bool
+	FrontendHost     string
 	PublicHost       string
 	PublicPort       string
+	RedirectHost     string
+	RedirectPort     string
 	OPENAI_KEY       string
 	CLOUDMERSIVE_KEY string
 	DBHost           string
@@ -30,8 +33,11 @@ func initConfig() Config {
 
 	return Config{
 		IsDev:            getEnvBool("IsDev", true),
+		FrontendHost:     getEnv("FrontendHost", "FrontendHost"),
 		PublicHost:       getEnv("PublicHost", "PublicHost"),
 		PublicPort:       getEnv("PublicPort", "PublicPort"),
+		RedirectPort:     getEnv("RedirectPort", "RedirectPort"),
+		RedirectHost:     getEnv("RedirectHost", "RedirectHost"),
 		OPENAI_KEY:       getEnv("OPENAI_KEY", "OPENAI_KEY"),
 		CLOUDMERSIVE_KEY: getEnv("CLOUDMERSIVE_KEY", "CLOUDMERSIVE_KEY"),
 		DBHost:           getEnv("DBHost", "DBHost"),
