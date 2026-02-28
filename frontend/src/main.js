@@ -35,8 +35,8 @@ document.getElementById('submitBtn').addEventListener('click', async () => {
             body: JSON.stringify({ link, mode, exclude }),
         });
 
-        if (!response.ok) throw new Error(`Server error: ${response.status}`);
         const data = await response.json();
+        if (!response.ok) throw new Error(data.message);
 
         if (mode === 'educational') {
             addToExclude(data.technique);

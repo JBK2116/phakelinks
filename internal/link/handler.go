@@ -57,7 +57,7 @@ func (linkConn *LinkConn) handleCreateLink(writer http.ResponseWriter, request *
 		if err != nil {
 			writer.Header().Set("Content-Type", "application/json")
 			writer.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(writer).Encode(map[string]string{"error": err.Error()})
+			json.NewEncoder(writer).Encode(map[string]string{"error": err.Error(), "message": "Something went wrong while generating the educational summary. Please try again."})
 			linkConn.logger.Info("Error creating explanationDTO", slog.Any("error", err.Error()))
 			return
 		}
@@ -69,14 +69,14 @@ func (linkConn *LinkConn) handleCreateLink(writer http.ResponseWriter, request *
 		if err != nil {
 			writer.Header().Set("Content-Type", "application/json")
 			writer.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(writer).Encode(map[string]string{"error": err.Error()})
+			json.NewEncoder(writer).Encode(map[string]string{"error": err.Error(), "message": "Something went wrong while generating the prank link. Please try again."})
 			linkConn.logger.Info("Error creating prankDTO", slog.Any("error", err.Error()))
 			return
 		}
 		if err := InsertLink(linkConn.db, dto.Link, prankDTO.Link); err != nil {
 			writer.Header().Set("Content-Type", "application/json")
-			writer.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(writer).Encode(map[string]string{"error": err.Error()})
+			writer.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(writer).Encode(map[string]string{"error": err.Error(), "message": "Something went wrong while creating the link. Please try again."})
 			linkConn.logger.Info("Error inserting link into database", slog.Any("error", err.Error()))
 			return
 		}

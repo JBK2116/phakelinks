@@ -20,38 +20,38 @@ import (
 // ValidateCreateLinkDTO() ensures that the provided CreateLinkDTO holds valid information in all fields
 func ValidateCreateLinkDTO(dto types.CreateLinkDTO) *types.ErrorResponse {
 	if dto.Link == "" {
-		return &types.ErrorResponse{Error: "MISSING_URL", Message: "url is required"}
+		return &types.ErrorResponse{Error: "MISSING_URL", Message: "A URL is required to create a link."}
 	}
 	if dto.Mode == "" {
 		return &types.ErrorResponse{
 			Error:   "MISSING_MODE",
-			Message: "mode is required",
+			Message: "A mode must be selected.",
 		}
 	}
 	if dto.Exclude == nil {
 		return &types.ErrorResponse{
 			Error:   "MISSING_EXCLUDE",
-			Message: "exclude is required",
+			Message: "An exclude list is required. Pass an empty array if you have no exclusions.",
 		}
 	}
 	if err := ValidateLink(dto.Link); err != nil {
 		return &types.ErrorResponse{
 			Error:   "INVALID_URL",
-			Message: "the provided url or domain is invalid",
+			Message: "The URL or domain is not valid. Ensure it includes a scheme (e.g. https://) and a proper domain.",
 			Value:   err.Error(),
 		}
 	}
 	if !ValidateMode(dto.Mode) {
 		return &types.ErrorResponse{
 			Error:   "INVALID_MODE",
-			Message: "the provided mode is invalid",
+			Message: "The provided mode is not valid",
 			Value:   dto.Mode,
 		}
 	}
 	if err := ValidateExcludes(dto.Exclude); err != nil {
 		return &types.ErrorResponse{
 			Error:   "INVALID_EXCLUDE",
-			Message: "the provided exclude value is invalid",
+			Message: "One or more exclude patterns are invalid. Ensure all patterns are valid URL paths or glob expressions.",
 			Extra:   err.Error(),
 		}
 	}
