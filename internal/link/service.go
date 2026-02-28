@@ -74,7 +74,11 @@ func ValidateURL(rawURL string, client http.Client) error {
 	defer cancel()
 	url := "https://api.cloudmersive.com/validate/domain/url/full"
 	method := "POST"
-	payload := strings.NewReader(rawURL)
+	body, err := json.Marshal(map[string]string{"URL": rawURL})
+	if err != nil {
+		return err
+	}
+	payload := strings.NewReader(string(body))
 	req, err := http.NewRequestWithContext(ctx, method, url, payload)
 	if err != nil {
 		return err
@@ -86,15 +90,16 @@ func ValidateURL(rawURL string, client http.Client) error {
 		return err
 	}
 	defer res.Body.Close()
-	body, err := io.ReadAll(res.Body)
+	resBody, err := io.ReadAll(res.Body)
+	fmt.Println(string(resBody))
 	if err != nil {
 		return err
 	}
-	result := make(map[string]bool)
-	if err := json.Unmarshal(body, &result); err != nil {
+	result := make(map[string]any)
+	if err := json.Unmarshal(resBody, &result); err != nil {
 		return err
 	}
-	if !result["ValidDomain"] {
+	if valid, ok := result["ValidURL"].(bool); !ok || !valid {
 		return fmt.Errorf("%s", rawURL)
 	}
 	return nil
