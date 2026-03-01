@@ -2,18 +2,26 @@
 IsDev="true or false"
 
 # Application Secrets
-PublicHost=""
-PublicPort=""
-
-# OPENAI KEYS
-OPENAI_KEY=""
-
-# Cloudmersive API
-CLOUDMERSIVE_KEY="919bcd50-4f8c-4ef2-9a16-a14acc7de73e"
+FrontendHost="host:port"
+PublicHost="host"
+PublicPort="port"
+RedirectHost="domain" # change this to click.xyz in prod
+RedirectPort="port"
 
 # DB Config
-DBHost=
-DBPort=
-DBUser=
-DBPassword=
-DBName=
+DBHost=host
+DBPort=port
+DBUser=user
+DBPassword=password
+DBName=name
+
+# Goose Configuration
+GOOSE_DRIVER="postgres"
+GOOSE_DBSTRING=postgres://user:password@host:port/name
+GOOSE_MIGRATION_DIR=./migrations
+
+# OPENAI KEYS
+OPENAI_KEY="Key String"
+
+# Cloudmersive API
+CLOUDMERSIVE_KEY="Key String"
