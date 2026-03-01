@@ -12,19 +12,25 @@ const (
 // PhishingTechnique represents an enum type of a PhishingTechnique string
 type PhishingTechnique string
 
-// const here stores all PhishingTechnique enums
 const (
-	CharacterSub    PhishingTechnique = "character-substitution"
-	HomoGlyphs      PhishingTechnique = "homoglyphs"
-	IDNHomograph    PhishingTechnique = "idn-homograph"
-	DotManipulation PhishingTechnique = "dot-manipulation"
-	HyphenInsertion PhishingTechnique = "hyphen-insertion"
-	TLDSwap         PhishingTechnique = "top-level-domain-swap"
-	SubDomainAbuse  PhishingTechnique = "subdomain-abuse"
-	ComboSquatting  PhishingTechnique = "combo-squatting"
+	CharacterSub     PhishingTechnique = "character-substitution"
+	HomoGlyphs       PhishingTechnique = "homoglyphs"
+	IDNHomograph     PhishingTechnique = "idn-homograph"
+	DotManipulation  PhishingTechnique = "dot-manipulation"
+	HyphenInsertion  PhishingTechnique = "hyphen-insertion"
+	TLDSwap          PhishingTechnique = "top-level-domain-swap"
+	SubDomainAbuse   PhishingTechnique = "subdomain-abuse"
+	ComboSquatting   PhishingTechnique = "combo-squatting"
+	TypoSquatting    PhishingTechnique = "typosquatting"
+	Punycode         PhishingTechnique = "punycode"
+	PathManipulation PhishingTechnique = "path-manipulation"
+	OpenRedirect     PhishingTechnique = "open-redirect"
+	AtSymbolAbuse    PhishingTechnique = "at-symbol-abuse"
+	PortAbuse        PhishingTechnique = "port-abuse"
+	HTTPSDeception   PhishingTechnique = "https-deception"
+	LookAlikeDomain  PhishingTechnique = "lookalike-domain"
 )
 
-// AllPhishingTechniques represents a slice containing all PhishingTechnique enums
 var AllPhishingTechniques = []PhishingTechnique{
 	CharacterSub,
 	HomoGlyphs,
@@ -34,6 +40,14 @@ var AllPhishingTechniques = []PhishingTechnique{
 	TLDSwap,
 	SubDomainAbuse,
 	ComboSquatting,
+	TypoSquatting,
+	Punycode,
+	PathManipulation,
+	OpenRedirect,
+	AtSymbolAbuse,
+	PortAbuse,
+	HTTPSDeception,
+	LookAlikeDomain,
 }
 
 // CreateLink represents the incoming request payload to generate a phishing URL.

@@ -91,7 +91,6 @@ func ValidateURL(rawURL string, client http.Client) error {
 	}
 	defer res.Body.Close()
 	resBody, err := io.ReadAll(res.Body)
-	fmt.Println(string(resBody))
 	if err != nil {
 		return err
 	}
@@ -199,7 +198,13 @@ func GetEducationalAISummary(phishingTech string, url string) (types.Explanation
 	if err != nil {
 		return dto, err
 	}
-	if err := json.Unmarshal([]byte(response.OutputText()), &dto); err != nil {
+	cleaned := strings.TrimSpace(response.OutputText())
+	cleaned = strings.TrimPrefix(cleaned, "```json")
+	cleaned = strings.TrimPrefix(cleaned, "```")
+	cleaned = strings.TrimSuffix(cleaned, "```")
+	cleaned = strings.TrimSpace(cleaned)
+
+	if err := json.Unmarshal([]byte(cleaned), &dto); err != nil {
 		return dto, err
 	}
 	dto.Technique = phishingTech
@@ -229,31 +234,35 @@ func GetPrankLink(url string) (types.PrankDTO, error) {
 	return dto, nil
 }
 
-// GetAIPrompt() returns a string representing an AI prompt that returns an educational summary
 func GetAIPrompt(phishingTech string, url string) string {
 	technique := string(phishingTech)
-
-	return fmt.Sprintf(`You are a phishing URL generator and cybersecurity educator.
-
+	return fmt.Sprintf(`You are a cybersecurity expert and phishing URL generator.
 Given the legitimate URL "%s" and the phishing technique "%s", return a JSON object with exactly two fields:
-1. "fake_link": A realistic phishing URL using the specified technique
-2. "explanation": A 3-4 sentence explanation covering: what technique is used, why it's effective, and how to spot it
-
+1. "fake_link": A realistic, convincing phishing URL using the specified technique. It must look legitimate enough to fool a non-technical user. Do not make it obviously fake. Preserve the path and query params from the original URL where possible.
+2. "explanation": A 4-6 sentence explanation covering: what technique is used, why it's effective, and how to spot it.
 Technique definitions:
-- character-substitution: Swap a character for a similar-looking one (e.g. amazon.com → arnazon.com, 0 for o)
-- homoglyphs: Replace letters with visually identical Unicode chars from other scripts (e.g. rn → m lookalike)
-- idn-homograph: Use internationalized domain name Unicode chars that render identically (e.g. Cyrillic а vs Latin a)
-- dot-manipulation: Add, remove, or move dots in the domain (e.g. amazon.com → amaz.on.com)
-- hyphen-insertion: Insert hyphens to break up the real domain (e.g. amazon.com → a-mazon.com or amazon-login.com)
-- top-level-domain-swap: Change the TLD (e.g. amazon.com → amazon.co or amazon.net or amazon.org)
-- subdomain-abuse: Make the real domain a subdomain of a fake one (e.g. amazon.com → amazon.verify-login.com)
-- combo-squatting: Append a legitimate-sounding word to the real domain (e.g. amazon.com → amazon-secure.com or amazonlogin.com)
-Do not wrap the response in markdown code fences or backticks. Return raw JSON only
-Respond with ONLY valid JSON, no markdown, no extra text:
+- character-substitution: Swap a character for a visually similar one (e.g. amazon.com -> arnazon.com, 0 for o)
+- homoglyphs: Replace letters with visually identical Unicode chars from other scripts (e.g. rn -> m lookalike)
+- idn-homograph: Use internationalized domain name Unicode chars that render identically in browsers (e.g. Cyrillic a vs Latin a)
+- dot-manipulation: Add, remove, or move dots in the domain (e.g. amazon.com -> amaz.on.com)
+- hyphen-insertion: Insert hyphens to break up the real domain (e.g. amazon.com -> amazon-login.com)
+- top-level-domain-swap: Change the TLD to something believable (e.g. amazon.com -> amazon.co, amazon.net)
+- subdomain-abuse: Make the real domain a subdomain of a fake one (e.g. amazon.com -> amazon.verify-login.com)
+- combo-squatting: Append a legitimate-sounding word (e.g. amazon.com -> amazon-secure.com)
+- typosquatting: Use common keyboard typos of the domain (e.g. amazon.com -> amazom.com, gogle.com)
+- punycode: Use xn-- encoded internationalized domain that renders identically in browsers (e.g. xn--mazon-wqa.com appearing as amazon.com)
+- path-manipulation: Embed the real domain in the URL path of a fake one (e.g. evil.com/www.amazon.com/login)
+- open-redirect: Abuse a legitimate sites redirect parameter to forward to a malicious site (e.g. google.com/url?q=evil.com)
+- at-symbol-abuse: Use the @ symbol so the browser ignores everything before it (e.g. https://amazon.com@evil.com)
+- port-abuse: Append a port that looks like part of a legitimate domain (e.g. amazon.com:8080.evil.com)
+- https-deception: Place https or a trusted brand in the subdomain to appear secure (e.g. https.amazon.com.evil.com)
+- lookalike-domain: Register a domain visually similar to the real one (e.g. arnazon.com, paypa1.com)
+IMPORTANT: The fake link must be subtle and convincing enough that a real person could genuinely fall for it. It should not look obviously fake or suspicious. The goal is realism — this is a cybersecurity education tool and the more realistic the example, the more valuable the lesson.
+You must return a raw JSON object. Do not use markdown. Do not use code fences. Do not wrap in backticks. The very first character of your response must be { and the very last character must be }.
 {"fake_link": "...", "explanation": "..."}`, url, technique)
 }
 
 // GetPrankPrompt() returns a string representing an AI prompt that returns a sketchy looking link
 func GetPrankPrompt(url string) string {
-	return fmt.Sprintf(`You are a prank link generator. Given the legitimate URL "%s", generate a single fake-looking suspicious link string that appears related to the domain/content of the URL but looks obviously sketchy (e.g. if given amazon.com, return something like amazon-free-gift-exe.zip or amazon_login_verify-132.exe.zip). Return only the raw link string, no JSON, no explanation, no markdown.`, url)
+	return fmt.Sprintf(`You are a prank link generator. Given the legitimate URL "%s", generate a single suspicious-looking slug that is based on the domain or brand of the provided URL. The slug should look realistic enough that someone might hesitate before clicking, but contain subtle red flags like unusual words, numbers, or file extensions that suggest something is off. Do not make it cartoonishly fake. Base it on the brand or content of the URL (e.g. given amazon.com return something like amazon-account-suspended-verify-132 or amazon-security-alert.exe). Return only the raw slug string with no scheme, no host, no explanation, no markdown, no extra text.`, url)
 }

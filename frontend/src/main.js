@@ -62,7 +62,7 @@ document.getElementById('submitBtn').addEventListener('click', async () => {
  * This function resets the exclude array if it surpasses 8 members
  */
 function resetExclude() {
-    if (exclude.length >= 8) {
+    if (exclude.length >= 16) {
         exclude = [];
     }
 }
