@@ -56,9 +56,12 @@ func (server *APIServer) Run() error {
 	router := mux.NewRouter()
 	wrappedRouter := middleware.StripTrailingSlashMiddleware(router) // router wrapping is needed here to ensure that middleware runs BEFORE matching to the path
 	subrouter := router.PathPrefix("/api/v1/").Subrouter()
-
 	linkConn := link.NewLinkConn(server.logger, server.db)
 	linkConn.RegisterRoutes(subrouter)
+	if !configs.Envs.IsDev {
+		fs := http.FileServer(http.Dir("/home/jovbk/phakelinks/frontend/dist"))
+		router.PathPrefix("/").Handler(fs)
+	}
 	return http.ListenAndServe(server.address, wrappedRouter)
 }
 
